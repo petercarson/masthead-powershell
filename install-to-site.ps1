@@ -30,14 +30,10 @@ Function Get-Context-For-Site([string]$siteURL, [string]$UserName, [string]$Pass
 $adminContext = Get-Context-For-Site -siteURL $url -UserName $UserName -Password $Password
 
 $siteContext = Get-Context-For-Site -siteURL $Site -UserName $UserName -Password $Password
-
 $siteWeb = $siteContext.Web
-
 $siteContext.Load($siteWeb)
 $siteContext.ExecuteQuery()
-
 $existingActions = $siteWeb.UserCustomActions
-
 $siteContext.Load($existingActions)
 $siteContext.ExecuteQuery()
 
@@ -51,121 +47,50 @@ $caMasthead.ClientSideComponentId = "27b0cb87-695b-4405-ae63-9db7d67e1029"
 $caMasthead.Update()
 
 $siteContext.ExecuteQuery()
-# {
-#   Name = caName,
-#   Title = caTitle,
-#   Group = "",
-#   Description = caDescription,
-#   Location = caLocation,
-#   ClientSideComponentId = caComponentId
-# };
-# CustomActionEntity caMastheadClassic = new CustomActionEntity
-# {
-#   Name = caClassicName,
-#   Title = caClassicTitle,
-#   Group = "",
-#   Description = caClassicDescription,
-#   Location = caClassicLocation,
-#   Sequence = caClassicSequence,
-#   ScriptBlock = caClassicScriptpt1 + contexts.BaseContext.Url + caClassicScriptpt2
-# };
 
-# var web = context.Web;
-# context.Load(web);
+Try {
+  $caClassic = $existingActions.Add()
+  $caClassic.Name = "Masthead Classic"
+  $caClassic.Title = "masthead-classic"
+  $caClassic.Group = ""
+  $caClassic.Description = "Masthead classic action"
+  $caClassic.Location = "ScriptLink"
+  $caClassic.Sequence = "4884"
+  $caClassic.ScriptBlock = "function masthedClassicRetrieve() {var request = new XMLHttpRequest();request.open('GET','" + $adminContext.Url + "/_api/lists/getbytitle(\\'masthead-app-settings\\')/items?$filter=Title eq \\'classicScript\\'',true);request.onreadystatechange = function(){if (request.readyState === 4 && request.status === 200){var json = JSON.parse(request.response);var script = document.createElement('script');script.type = 'text/javascript';script.src = json.value[0].URL + 'masthead-classic.js';document.getElementsByTagName('body')[0].appendChild(script);var link = document.createElement('link');link.type = 'text/css';link.rel = 'stylesheet'; link.href= json.value[0].URL + 'styles.css';document.getElementsByTagName('head')[0].appendChild(link);}}; request.withCredentials = true;request.setRequestHeader('Accept', 'application/json');request.send();}masthedClassicRetrieve();masthedClassicRetrieve = null;";
+  $caClassic.Update()
+  $siteContext.ExecuteQuery()
+}
+Catch {
+  "Error adding classic version of masthead. If you are on a modern site, this is expected."
+}
 
-# web.AddCustomAction(caMasthead);
+$settingsList = Get-List -Context $adminContext -ListTitle $ListTitle
+$adminContext.Load($settingsList)
+$adminContext.ExecuteQuery();
 
-# try {
-#   web.AddCustomAction(caMastheadClassic);
-# }
-# catch {
-# }
+$query = New-Object Microsoft.SharePoint.Client.CamlQuery
+$query.ViewXml = "<View>
+    <RowLimit></RowLimit>
+</View>"
+$listItems = $settingsList.GetItems($query)
+$adminContext.Load($listItems)
+$adminContext.ExecuteQuery();
 
-# try {
-#   context.ExecuteQueryRetry();
-#   return true;
-# }
-# catch {
-#   return false;
-# }
+$instance = $listItems | Where-Object {$_["URL"] -eq $Site.ToLower()}
 
-
-# CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
-# ListItemCollection items = mastheadList.GetItems(camlQuery);
-# contexts.BaseContext.Load(items);
-# contexts.BaseContext.ExecuteQueryRetry();
-
-# foreach (var site in sites)
-# {
-
-# var context = _getContextForSite(url);
-# var masthead = _getMastheadActionsFromContext(context);
-
-# if (masthead.Count() == 0)
-# {
-#     using (context)
-#     {
-
-#         CustomActionEntity caMasthead = new CustomActionEntity
-#         {
-#             Name = caName,
-#             Title = caTitle,
-#             Group = "",
-#             Description = caDescription,
-#             Location = caLocation,
-#             ClientSideComponentId = caComponentId
-#         };
-#         CustomActionEntity caMastheadClassic = new CustomActionEntity
-#         {
-#             Name = caClassicName,
-#             Title = caClassicTitle,
-#             Group = "",
-#             Description = caClassicDescription,
-#             Location = caClassicLocation,
-#             Sequence = caClassicSequence,
-#             ScriptBlock = caClassicScriptpt1 + contexts.BaseContext.Url + caClassicScriptpt2
-#         };
-
-#         var web = context.Web;
-#         context.Load(web);
-
-#         web.AddCustomAction(caMasthead);
-
-#         try
-#         {
-#             web.AddCustomAction(caMastheadClassic);
-#         } catch
-#         {
-#         }
-
-#         try
-#         {
-#             context.ExecuteQueryRetry();
-#             return true;
-#         } catch
-#         {
-#             return false;
-#         }
-#     }
-# }
-
-
-# var existingItem = items.FirstOrDefault(item => item["URL"] as string == URL);
-
-# if (existingItem == null) {
-#   ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
-#   ListItem mastheadURLItem = list.AddItem(itemCreateInfo);
-#   mastheadURLItem["URL"] = URL.ToLower();
-#   mastheadURLItem["Title"] = title;
-#   mastheadURLItem.Update();
-#   list.Update();
-#   try {
-#     context.ExecuteQueryRetry();
-#     return true;
-#   }
-#   catch {
-#     return false;
-#   }
-# }
-# return false;
-# }
+if ($instance -eq $null) {
+  $listItemInfo = New-Object Microsoft.SharePoint.Client.ListItemCreationInformation
+  $mastheadURLItem = $settingsList.AddItem($listItemInfo)
+  $mastheadURLItem["URL"] = $Site.ToLower()
+  $mastheadURLItem["Title"] = "masthead-url";
+  $mastheadURLItem.Update()
+  $settingsList.Update()
+  try {
+    $adminContext.ExecuteQuery()
+  }
+  catch {
+    "Error adding to list"
+  }
+} else {
+  "Already on list, exiting..."
+}
