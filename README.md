@@ -1,5 +1,5 @@
 # Introduction
-_masthead.ps1_ is a collection of PowerShell scripts that make managing your masthead sites easier. Currently, the library contains:
+_masthead.ps1_ is a collection of PowerShell scripts that make managing your Masthead sites easier. Currently, the library contains:
   1. Install-To-Site
   2. Uninstall-From-Site
 
@@ -19,5 +19,5 @@ To run these functions, you'll need to make sure that the library is first loade
 
 |Name | Command | Description|
 |-----|---------|------------|
-|Install-To-Site | `Install-To-Site <ABSOLUTE_SITE_URL>` | Adds the version of Masthead you have installed to the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://\<your-site>.sharepoint.com/sites/\<site-name>`) |
-|Uninstall-From-Site | `Uninstall-From-Site <ABSOLUTE_SITE_URL>` | Removes Masthead from the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://\<your-site>.sharepoint.com/sites/\<site-name>`) |
+|Install-To-Site | `Install-To-Site <ABSOLUTE_SITE_URL>` | Adds the version of Masthead you have installed to the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
+|Uninstall-From-Site | `Uninstall-From-Site <ABSOLUTE_SITE_URL>` | Removes Masthead from the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
