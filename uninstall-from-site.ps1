@@ -6,7 +6,7 @@ Import-Module 'C:\Program Files\Common Files\Microsoft Shared\Web Server Extensi
 $UserName = "admin@itgroovedeveloper.onmicrosoft.com"
 $Password = "itgD3v!!!"
 $Url = "https://itgroovedeveloper.sharepoint.com/sites/masthead-app-dev/"
-$Site = "https://itgroovedeveloper.sharepoint.com/sites/CustomCommunicationSite"
+$Site = "https://itgroovedeveloper.sharepoint.com/sites/mastheadclassictest/"
 
 $ListTitle = "masthead-app-settings"
 $caClassicSequence = 4884
@@ -59,8 +59,6 @@ $siteContext = Get-Context-For-Site -siteURL $Site -UserName $UserName -Password
 
 $actions = Get-Masthead-Actions-From-Context -Context $siteContext
 
-$actions.Count
-
 Foreach($action in $actions) {
   $action.DeleteObject()
 }
@@ -82,7 +80,6 @@ $adminContext.ExecuteQuery();
 $instance = $listItems | Where-Object {$_["URL"] -eq $Site.ToLower()}
 
 Foreach($item in $instance) {
-  $item["URL"]
   $item.DeleteObject()
 }
 
