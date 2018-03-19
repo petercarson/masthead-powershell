@@ -7,6 +7,7 @@ $UserName = "admin@itgroovedeveloper.onmicrosoft.com"
 $Password = "itgD3v!!!"
 $Url = "https://itgroovedeveloper.sharepoint.com/sites/masthead-app-dev/"
 $ListTitle = "masthead-app-settings"
+$Site = "https://itgroovedeveloper.sharepoint.com/sites/CustomCommunicationSite"
 
 Function Get-SPOCredentials([string]$UserName, [string]$Password) {
   $SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
@@ -20,12 +21,74 @@ Function Get-List([Microsoft.SharePoint.Client.ClientContext]$Context, [String]$
   $list
 }
 
-$context = New-Object Microsoft.SharePoint.Client.ClientContext($Url)
-$context.Credentials = Get-SPOCredentials -UserName $UserName -Password $Password
+Function Get-Context-For-Site([string]$siteURL, [string]$UserName, [string]$Password) {
+  $context = New-Object Microsoft.SharePoint.Client.ClientContext($siteURL)
+  $context.Credentials = Get-SPOCredentials -UserName $UserName -Password $Password
+  return $context
+}
 
-$list = Get-List -Context $context -ListTitle $ListTitle
+$adminContext = Get-Context-For-Site -siteURL $url -UserName $UserName -Password $Password
 
-$list.Title
+$siteContext = Get-Context-For-Site -siteURL $Site -UserName $UserName -Password $Password
+
+$siteWeb = $siteContext.Web
+
+$siteContext.Load($siteWeb)
+$siteContext.ExecuteQuery()
+
+$existingActions = $siteWeb.UserCustomActions
+
+$siteContext.Load($existingActions)
+$siteContext.ExecuteQuery()
+
+$caMasthead = $existingActions.Add()
+$caMasthead.Name = "Masthead"
+$caMasthead.Title = "s-masthead-spx"
+$caMasthead.Group = ""
+$caMasthead.Description = "Masthead for sharepoint"
+$caMasthead.Location = "ClientSideExtension.ApplicationCustomizer"
+$caMasthead.ClientSideComponentId = "27b0cb87-695b-4405-ae63-9db7d67e1029"
+$caMasthead.Update()
+
+$siteContext.ExecuteQuery()
+# {
+#   Name = caName,
+#   Title = caTitle,
+#   Group = "",
+#   Description = caDescription,
+#   Location = caLocation,
+#   ClientSideComponentId = caComponentId
+# };
+# CustomActionEntity caMastheadClassic = new CustomActionEntity
+# {
+#   Name = caClassicName,
+#   Title = caClassicTitle,
+#   Group = "",
+#   Description = caClassicDescription,
+#   Location = caClassicLocation,
+#   Sequence = caClassicSequence,
+#   ScriptBlock = caClassicScriptpt1 + contexts.BaseContext.Url + caClassicScriptpt2
+# };
+
+# var web = context.Web;
+# context.Load(web);
+
+# web.AddCustomAction(caMasthead);
+
+# try {
+#   web.AddCustomAction(caMastheadClassic);
+# }
+# catch {
+# }
+
+# try {
+#   context.ExecuteQueryRetry();
+#   return true;
+# }
+# catch {
+#   return false;
+# }
+
 
 # CamlQuery camlQuery = CamlQuery.CreateAllItemsQuery();
 # ListItemCollection items = mastheadList.GetItems(camlQuery);
