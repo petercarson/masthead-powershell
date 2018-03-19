@@ -1,20 +1,25 @@
+Param(
+  [Parameter(Mandatory=$true,Position=1)]
+  [string]$UserName,
+  [Parameter(Mandatory=$true,Position=2)]
+  [SecureString]$Password,
+  [Parameter(Mandatory=$true,Position=3)]
+  [string]$TargetSite,
+  [Parameter(Mandatory=$true,Position=4)]
+  [string]$MastheadInstallerSite
+)
+
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client")
 [System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SharePoint.Client.Runtime")
 
 Import-Module 'C:\Program Files\Common Files\Microsoft Shared\Web Server Extensions\16\ISAPI\Microsoft.SharePoint.Client.dll'
 
-$UserName = "admin@itgroovedeveloper.onmicrosoft.com"
-$Password = "itgD3v!!!"
-$Url = "https://itgroovedeveloper.sharepoint.com/sites/masthead-app-dev/"
-$Site = "https://itgroovedeveloper.sharepoint.com/sites/mastheadclassictest/"
-
 $ListTitle = "masthead-app-settings"
 $caClassicSequence = 4884
 $caComponentId = "27b0cb87-695b-4405-ae63-9db7d67e1029"
 
-Function Get-SPOCredentials([string]$UserName, [string]$Password) {
-  $SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
-  return New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($UserName, $SecurePassword)
+Function Get-SPOCredentials([string]$UserName, [SecureString]$Password) {
+  return New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($UserName, $Password)
 }
 
 Function Get-List([Microsoft.SharePoint.Client.ClientContext]$Context, [String]$ListTitle) {
@@ -24,7 +29,7 @@ Function Get-List([Microsoft.SharePoint.Client.ClientContext]$Context, [String]$
   $list
 }
 
-Function Get-Context-For-Site([string]$siteURL, [string]$UserName, [string]$Password) {
+Function Get-Context-For-Site([string]$siteURL, [string]$UserName, [SecureString]$Password) {
   $context = New-Object Microsoft.SharePoint.Client.ClientContext($siteURL)
   $context.Credentials = Get-SPOCredentials -UserName $UserName -Password $Password
   return $context
@@ -54,8 +59,8 @@ Function Get-Masthead-Actions-From-Context([Microsoft.SharePoint.Client.ClientCo
 
 }
 
-$adminContext = Get-Context-For-Site -siteURL $url -UserName $UserName -Password $Password
-$siteContext = Get-Context-For-Site -siteURL $Site -UserName $UserName -Password $Password
+$adminContext = Get-Context-For-Site -siteURL $MastheadInstallerSite -UserName $UserName -Password $Password
+$siteContext = Get-Context-For-Site -siteURL $TargetSite -UserName $UserName -Password $Password
 
 $actions = Get-Masthead-Actions-From-Context -Context $siteContext
 
@@ -77,7 +82,7 @@ $listItems = $settingsList.GetItems($query)
 $adminContext.Load($listItems)
 $adminContext.ExecuteQuery();
 
-$instance = $listItems | Where-Object {$_["URL"] -eq $Site.ToLower()}
+$instance = $listItems | Where-Object {$_["URL"] -eq $TargetSite.ToLower()}
 
 Foreach($item in $instance) {
   $item.DeleteObject()
