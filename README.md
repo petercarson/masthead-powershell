@@ -17,7 +17,7 @@ Anytime you start a new session with the library you'll need to go through steps
 
 To run these functions, you'll need to make sure that the library is first loaded into memory. Once done, you can call these functions directly from the PowerShell command line.
 
-|Name | Command | Description|
-|-----|---------|------------|
-|Install-To-Site | `Install-To-Site <ABSOLUTE_SITE_URL>` | Adds the version of Masthead you have installed to the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
-|Uninstall-From-Site | `Uninstall-From-Site <ABSOLUTE_SITE_URL>` | Removes Masthead from the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
+| Command | Description|
+|---------|------------|
+| `Install-To-Site <ABSOLUTE_SITE_URL>` | Adds the version of Masthead you have installed to the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
+| `Uninstall-From-Site <ABSOLUTE_SITE_URL>` | Removes Masthead from the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
