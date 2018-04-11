@@ -45,6 +45,8 @@ Function Get-Context-For-Site([string]$siteURL, [string]$UserName, [SecureString
   return $context
 }
 
+$adminContext = Get-Context-For-Site -siteURL $MastheadInstallerSite -UserName $UserName -Password $Password
+
 Function Get-Masthead-Actions-From-Context([Microsoft.SharePoint.Client.ClientContext]$Context) {
 
   $siteActions = $Context.Site.UserCustomActions
