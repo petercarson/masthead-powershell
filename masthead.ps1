@@ -175,29 +175,15 @@ Function Uninstall-From-Site([string]$TargetSite) {
 }
 
 Function Install-To-Site-And-Subsites([string]$TargetSite) {
-  Install-To-Site -TargetSite $TargetSite -MastheadInstallerSite $MastheadInstallerSite
-
-  $siteContext = Get-Context-For-Site -siteURL $TargetSite -UserName $UserName -Password $Password
-
-  $TargetSite -match 'https:\/\/(.*?\.sharepoint.com)'
-  $originalDomain = $Matches[1]
-
-  $web = $siteContext.Web
-  $siteContext.Load($web)
-  $siteContext.ExecuteQuery()
-  $Webs = $siteContext.Web.Webs
-  $siteContext.Load($Webs)
-  $siteContext.ExecuteQuery()
-
-  Foreach ($site in $Webs) {
-    if  ($site.Url -match $originalDomain) {
-      Install-To-Site-And-Subsites -TargetSite $site.Url
-    }
-  }
+  Use-On-Subsites -TargetSite $TargetSite -RecursiveFunction ${function:Install-To-Site}
 }
 
 Function Uninstall-From-Site-And-Subsites([string]$TargetSite) {
-  Uninstall-From-Site -TargetSite $TargetSite -MastheadInstallerSite $MastheadInstallerSite
+  Use-On-Subsites -TargetSite $TargetSite -RecursiveFunction ${function:Uninstall-From-Site}
+}
+
+Function Use-On-Subsites([string]$TargetSite, [scriptblock]$RecursiveFunction) {
+  $RecursiveFunction.Invoke($TargetSite)
 
   $siteContext = Get-Context-For-Site -siteURL $TargetSite -UserName $UserName -Password $Password
 
@@ -213,7 +199,8 @@ Function Uninstall-From-Site-And-Subsites([string]$TargetSite) {
 
   Foreach ($site in $Webs) {
     if  ($site.Url -match $originalDomain) {
-      Uninstall-From-Site-And-Subsites -TargetSite $site.Url
+      Use-On-Subsites -TargetSite $site.Url -RecursiveFunction $RecursiveFunction
     }
   }
+
 }
