@@ -2,6 +2,8 @@
 _masthead.ps1_ is a collection of PowerShell scripts that make managing your Masthead sites easier. Currently, the library contains:
   1. Install-To-Site
   2. Uninstall-From-Site
+  3. Install-To-Site-And-Subsites
+  4. Uninstall-From-Site-And-Subsites
 
 # Getting Started
 Before you use our library, you'll need to make sure you have the latest version of the [SharePoint Online Client Components SDK](https://www.microsoft.com/en-ca/download/details.aspx?id=42038) installed on your system.
@@ -21,3 +23,5 @@ To run these functions, you'll need to make sure that the library is first loade
 |---------|------------|
 | `Install-To-Site <ABSOLUTE_SITE_URL>` | Adds the version of Masthead you have installed to the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
 | `Uninstall-From-Site <ABSOLUTE_SITE_URL>` | Removes Masthead from the target site. Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
+| `Install-To-Site-And-Subsites <ABSOLUTE_SITE_URL>` | Adds the version of Masthead you have installed to the target site as well as all of its subsites (and those subsites' subsites, etc.). Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |
+| `Uninstall-From-Site-And-Subsites <ABSOLUTE_SITE_URL>` | Removes Masthead from the target site as well as all of its subsites (and those subsites' subsites, etc.). Make sure the URL you're using is a reference to the site without any pages on the end (ex: `https://<your-site>.sharepoint.com/sites/<site-name>`) |

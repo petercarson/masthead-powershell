@@ -27,7 +27,6 @@ $caClassicSequence = 4884;
 $caClassicScriptpt1 = 'function masthedClassicRetrieve() {var request = new XMLHttpRequest();request.open("GET","';
 $caClassicScriptpt2 = '/_api/lists/getbytitle(''masthead-app-settings'')/items?$filter=Title eq ''classicScript''",true);request.onreadystatechange = function(){if (request.readyState === 4 && request.status === 200){var json = JSON.parse(request.response);var script = document.createElement("script");script.type = "text/javascript";script.src = json.value[0].URL + "masthead-classic.js";document.getElementsByTagName("body")[0].appendChild(script);var link = document.createElement("link");link.type = "text/css";link.rel = "stylesheet"; link.href= json.value[0].URL + "styles.css";document.getElementsByTagName("head")[0].appendChild(link);}}; request.withCredentials = true;request.setRequestHeader("Accept", "application/json");request.send();}masthedClassicRetrieve();masthedClassicRetrieve = null;'
 
-$adminContext = Get-Context-For-Site -siteURL $MastheadInstallerSite -UserName $UserName -Password $Password
 Function Get-SPOCredentials([string]$UserName, [SecureString]$Password) {
   return New-Object Microsoft.SharePoint.Client.SharePointOnlineCredentials($UserName, $Password)
 }
@@ -70,7 +69,7 @@ Function Get-Masthead-Actions-From-Context([Microsoft.SharePoint.Client.ClientCo
   }
 
 }
-Function Install-To-Site([string]$TargetSite, [string]$MastheadInstallerSite) {
+Function Install-To-Site([string]$TargetSite) {
 
   $siteContext = Get-Context-For-Site -siteURL $TargetSite -UserName $UserName -Password $Password
 
@@ -173,4 +172,35 @@ Function Uninstall-From-Site([string]$TargetSite) {
 
   $adminContext.Web.Update()
   $adminContext.ExecuteQuery()
+}
+
+Function Install-To-Site-And-Subsites([string]$TargetSite) {
+  Use-On-Subsites -TargetSite $TargetSite -RecursiveFunction ${function:Install-To-Site}
+}
+
+Function Uninstall-From-Site-And-Subsites([string]$TargetSite) {
+  Use-On-Subsites -TargetSite $TargetSite -RecursiveFunction ${function:Uninstall-From-Site}
+}
+
+Function Use-On-Subsites([string]$TargetSite, [scriptblock]$RecursiveFunction) {
+  $RecursiveFunction.Invoke($TargetSite)
+
+  $siteContext = Get-Context-For-Site -siteURL $TargetSite -UserName $UserName -Password $Password
+
+  $TargetSite -match 'https:\/\/(.*?\.sharepoint.com)'
+  $originalDomain = $Matches[1]
+
+  $web = $siteContext.Web
+  $siteContext.Load($web)
+  $siteContext.ExecuteQuery()
+  $Webs = $siteContext.Web.Webs
+  $siteContext.Load($Webs)
+  $siteContext.ExecuteQuery()
+
+  Foreach ($site in $Webs) {
+    if  ($site.Url -match $originalDomain) {
+      Use-On-Subsites -TargetSite $site.Url -RecursiveFunction $RecursiveFunction
+    }
+  }
+
 }
