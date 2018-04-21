@@ -130,6 +130,7 @@ Function Install-To-Site([string]$TargetSite) {
     $settingsList.Update()
     try {
       $adminContext.ExecuteQuery()
+      "Installed on $TargetSite"
     }
     catch {
       "Error adding to list"
@@ -172,6 +173,7 @@ Function Uninstall-From-Site([string]$TargetSite) {
 
   $adminContext.Web.Update()
   $adminContext.ExecuteQuery()
+  "Uninstalled from $TargetSite"
 }
 
 Function Install-To-Site-And-Subsites([string]$TargetSite) {
